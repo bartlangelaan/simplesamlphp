@@ -284,6 +284,7 @@ class Crypto
                 $certFingerprint = strtolower(sha1(base64_decode($certData)));
 
                 return [
+                    'name'            => $key['name'] ?? NULL,
                     'certData'        => $certData,
                     'PEM'             => $pem,
                     'certFingerprint' => [$certFingerprint],
