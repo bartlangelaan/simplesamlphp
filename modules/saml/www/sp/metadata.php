@@ -264,6 +264,7 @@ $xml = $metaBuilder->getEntityDescriptorText();
 unset($metaArray20['UIInfo']);
 unset($metaArray20['metadata-set']);
 unset($metaArray20['entityid']);
+unset($metaArray20['key_name']);
 
 // sanitize the attributes array to remove friendly names
 if (isset($metaArray20['attributes']) && is_array($metaArray20['attributes'])) {
