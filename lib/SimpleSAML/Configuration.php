@@ -1349,8 +1349,10 @@ class Configuration implements Utils\ClearableState
         } elseif ($this->hasValue($prefix . 'certData')) {
             $certData = $this->getString($prefix . 'certData');
             $certData = preg_replace('/\s+/', '', $certData);
+            $keyName = $this->getString($prefix . 'key_name', null);
             return [
                 [
+                    'name'            => $keyName,
                     'encryption'      => true,
                     'signing'         => true,
                     'type'            => 'X509Certificate',
@@ -1376,9 +1378,11 @@ class Configuration implements Utils\ClearableState
                 );
             }
             $certData = preg_replace('/\s+/', '', $matches[1]);
+            $keyName = $this->getString($prefix . 'key_name', null);
 
             return [
                 [
+                    'name'            => $keyName,
                     'encryption'      => true,
                     'signing'         => true,
                     'type'            => 'X509Certificate',
