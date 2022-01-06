@@ -118,6 +118,7 @@ if ($certInfo !== null && array_key_exists('certData', $certInfo)) {
     $certData = $certInfo['certData'];
 
     $keys[] = [
+        'name'            => $certInfo['name'] ?? NULL,
         'type'            => 'X509Certificate',
         'signing'         => true,
         'encryption'      => true,
@@ -132,6 +133,7 @@ if ($certInfo !== null && array_key_exists('certData', $certInfo)) {
     $certData = $certInfo['certData'];
 
     $keys[] = [
+        'name'            => $certInfo['name'] ?? NULL,
         'type'            => 'X509Certificate',
         'signing'         => true,
         'encryption'      => ($hasNewCert ? false : true),
@@ -221,6 +223,9 @@ if ($email && $email !== 'na@example.org') {
 // add certificate
 if (count($keys) === 1) {
     $metaArray20['certData'] = $keys[0]['X509Certificate'];
+    if (isset($keys[0]['name'])) {
+        $metaArray20['key_name'] = $keys[0]['name'];
+    }
 } elseif (count($keys) > 1) {
     $metaArray20['keys'] = $keys;
 }
@@ -262,6 +267,7 @@ $xml = $metaBuilder->getEntityDescriptorText();
 unset($metaArray20['UIInfo']);
 unset($metaArray20['metadata-set']);
 unset($metaArray20['entityid']);
+unset($metaArray20['key_name']);
 
 // sanitize the attributes array to remove friendly names
 if (isset($metaArray20['attributes']) && is_array($metaArray20['attributes'])) {
