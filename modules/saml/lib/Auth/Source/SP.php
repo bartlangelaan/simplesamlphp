@@ -227,7 +227,7 @@ class SP extends \SimpleSAML\Auth\Source
                         'prefix' => 'new_'
                     ]
                 ),
-                'name' => 'sp',
+                'name' => $certInfo['name'] ?? null,
             ];
         }
 
@@ -247,7 +247,7 @@ class SP extends \SimpleSAML\Auth\Source
                         'prefix' => ''
                     ]
                 ),
-                'name' => 'sp',
+                'name' => $certInfo['name'] ?? null,
             ];
         }
 

@@ -120,6 +120,7 @@ if ($certInfo !== null && array_key_exists('certData', $certInfo)) {
     $certData = $certInfo['certData'];
 
     $keys[] = [
+        'name'            => $certInfo['name'] ?? null,
         'type'            => 'X509Certificate',
         'signing'         => true,
         'encryption'      => true,
@@ -134,6 +135,7 @@ if ($certInfo !== null && array_key_exists('certData', $certInfo)) {
     $certData = $certInfo['certData'];
 
     $keys[] = [
+        'name'            => $certInfo['name'] ?? null,
         'type'            => 'X509Certificate',
         'signing'         => true,
         'encryption'      => ($hasNewCert ? false : true),
@@ -223,6 +225,9 @@ if ($email && $email !== 'na@example.org') {
 // add certificate
 if (count($keys) === 1) {
     $metaArray20['certData'] = $keys[0]['X509Certificate'];
+    if (isset($keys[0]['name'])) {
+        $metaArray20['key_name'] = $keys[0]['name'];
+    }
 } elseif (count($keys) > 1) {
     $metaArray20['keys'] = $keys;
 }
