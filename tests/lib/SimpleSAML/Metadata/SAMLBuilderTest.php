@@ -33,18 +33,26 @@ class SAMLBuilderTest extends TestCase
     }
 
     /**
+     * Helper function that takes a saml:SP authentication source configuration
+     * and adds it to the SAMLBuilder.
+     */
+    private function buildSpMetadataFromConfig(array $config, $entityId = 'https://entity.example.com/id'): SAMLBuilder
+    {
+        $info = ['AuthId' => $entityId];
+        $samlBuilder = new SAMLBuilder($entityId);
+        $sp = new SP($info, $config);
+        $samlBuilder->addMetadataSP20($sp->getHostedMetadata());
+        return $samlBuilder;
+    }
+
+    /**
      * Test the requested attributes are valued correctly.
      */
     public function testAttributes(): void
     {
-        $entityId = 'https://entity.example.com/id';
-
-        //  test SP20 array parsing, no friendly name
-        $set = 'saml20-sp-remote';
+        //  test SP20 array parsing, no friendly name=
         $metadata = [
-            'entityid'     => $entityId,
             'name'         => ['en' => 'Test SP'],
-            'metadata-set' => $set,
             'attributes'   => [
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.10',
                 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',
@@ -53,8 +61,7 @@ class SAMLBuilderTest extends TestCase
             ],
         ];
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
 
         $spDesc = $samlBuilder->getEntityDescriptor();
         /** @psalm-var \DOMNodeList $acs */
@@ -74,11 +81,8 @@ class SAMLBuilderTest extends TestCase
         }
 
         // test SP20 array parsing, no friendly name
-        $set = 'saml20-sp-remote';
         $metadata = [
-            'entityid'     => $entityId,
             'name'         => ['en' => 'Test SP'],
-            'metadata-set' => $set,
             'attributes'   => [
                 'eduPersonTargetedID'    => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.10',
                 'eduPersonPrincipalName' => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',
@@ -87,8 +91,7 @@ class SAMLBuilderTest extends TestCase
             ],
         ];
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
 
         $spDesc = $samlBuilder->getEntityDescriptor();
         /** @var \DOMNodeList $acs */
@@ -116,21 +119,15 @@ class SAMLBuilderTest extends TestCase
      */
     public function testAttributeConsumingServiceDefault(): void
     {
-        $entityId = 'https://entity.example.com/id';
-        $set = 'saml20-sp-remote';
-
         $metadata = [
-            'entityid'     => $entityId,
             'name'         => ['en' => 'Test SP'],
-            'metadata-set' => $set,
             'attributes'   => [
                 'eduPersonTargetedID'    => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.10',
                 'eduPersonPrincipalName' => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',
             ],
         ];
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
 
         $spDesc = $samlBuilder->getEntityDescriptor();
         /** @var \DOMNodeList $acs */
@@ -142,8 +139,7 @@ class SAMLBuilderTest extends TestCase
 
         $metadata['attributes.isDefault'] = true;
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
         $spDesc = $samlBuilder->getEntityDescriptor();
         $acs = $spDesc->getElementsByTagName("AttributeConsumingService");
 
@@ -154,8 +150,7 @@ class SAMLBuilderTest extends TestCase
 
         $metadata['attributes.isDefault'] = false;
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
         $spDesc = $samlBuilder->getEntityDescriptor();
         $acs = $spDesc->getElementsByTagName("AttributeConsumingService");
 
@@ -171,21 +166,15 @@ class SAMLBuilderTest extends TestCase
      */
     public function testAttributeConsumingServiceIndex(): void
     {
-        $entityId = 'https://entity.example.com/id';
-        $set = 'saml20-sp-remote';
-
         $metadata = [
-            'entityid'     => $entityId,
             'name'         => ['en' => 'Test SP'],
-            'metadata-set' => $set,
             'attributes'   => [
                 'eduPersonTargetedID'    => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.10',
                 'eduPersonPrincipalName' => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',
             ],
         ];
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
 
         $spDesc = $samlBuilder->getEntityDescriptor();
         $acs = $spDesc->getElementsByTagName("AttributeConsumingService");
@@ -197,8 +186,7 @@ class SAMLBuilderTest extends TestCase
 
         $metadata['attributes.index'] = 15;
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
 
         $spDesc = $samlBuilder->getEntityDescriptor();
         $acs = $spDesc->getElementsByTagName("AttributeConsumingService");
@@ -304,14 +292,9 @@ class SAMLBuilderTest extends TestCase
      */
     public function testContacts(): void
     {
-        $entityId = 'https://entity.example.com/id';
-
         //  test SP20 array parsing, no friendly name
-        $set = 'saml20-sp-remote';
         $metadata = [
-            'entityid'     => $entityId,
             'name'         => ['en' => 'Test SP'],
-            'metadata-set' => $set,
             'contacts' => [
                 [
                    'contactType'       => 'other',
@@ -333,8 +316,7 @@ class SAMLBuilderTest extends TestCase
             ],
         ];
 
-        $samlBuilder = new SAMLBuilder($entityId);
-        $samlBuilder->addMetadata($set, $metadata);
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
 
         $spDesc = $samlBuilder->getEntityDescriptor();
         /** @psalm-var \DOMNodeList $acs */
@@ -394,16 +376,12 @@ class SAMLBuilderTest extends TestCase
      */
     public function testCertificateData(): void
     {
-        $info = ['AuthId' => 'default-sp'];
         $metadata = [
             'certificate' => '../' . self::SECURITY . '/certificates/rsa-pem/selfsigned.simplesamlphp.org.crt',
             'privatekey' => '../' . self::SECURITY . '/certificates/rsa-pem/selfsigned.simplesamlphp.org.key',
         ];
 
-        // Without a key name, it should have KeyDescriptors but no KeyNames.
-        $samlBuilder = new SAMLBuilder('default-sp');
-        $sp = new SP($info, $metadata);
-        $samlBuilder->addMetadataSP20($sp->getHostedMetadata());
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
         $spDesc = $samlBuilder->getEntityDescriptor();
 
         $this->assertEquals(2, $spDesc->getElementsByTagName("KeyDescriptor")->length);
@@ -413,9 +391,7 @@ class SAMLBuilderTest extends TestCase
         $metadata['key_name'] = 'my-key-name';
 
         // It should now also have 2 KeyNames.
-        $samlBuilder = new SAMLBuilder('default-sp');
-        $sp = new SP($info, $metadata);
-        $samlBuilder->addMetadataSP20($sp->getHostedMetadata());
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
         $spDesc = $samlBuilder->getEntityDescriptor();
 
         $this->assertEquals(2, $spDesc->getElementsByTagName("KeyDescriptor")->length);
@@ -430,9 +406,7 @@ class SAMLBuilderTest extends TestCase
         $metadata['new_key_name'] = 'my-new-key-name';
 
         // It should now have 3 KeyNames.
-        $samlBuilder = new SAMLBuilder('default-sp');
-        $sp = new SP($info, $metadata);
-        $samlBuilder->addMetadataSP20($sp->getHostedMetadata());
+        $samlBuilder = $this->buildSpMetadataFromConfig($metadata);
         $spDesc = $samlBuilder->getEntityDescriptor();
 
         $this->assertEquals(3, $spDesc->getElementsByTagName("KeyDescriptor")->length);
