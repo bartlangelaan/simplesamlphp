@@ -167,9 +167,52 @@ class SAMLBuilderTest extends TestCase
 
 
     /**
+     * Test the index option is used correctly, in the old way.
+     */
+    public function testLegacyAttributeConsumingServiceIndex(): void
+    {
+        $entityId = 'https://entity.example.com/id';
+        $set = 'saml20-sp-remote';
+
+        $metadata = [
+            'entityid'     => $entityId,
+            'name'         => ['en' => 'Test SP'],
+            'metadata-set' => $set,
+            'attributes'   => [
+                'eduPersonTargetedID'    => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.10',
+                'eduPersonPrincipalName' => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',
+            ],
+        ];
+
+        $samlBuilder = new SAMLBuilder($entityId);
+        $samlBuilder->addMetadata($set, $metadata);
+
+        $spDesc = $samlBuilder->getEntityDescriptor();
+        $acs = $spDesc->getElementsByTagName("AttributeConsumingService");
+
+        /** @var \DOMElement $acs1 */
+        $acs1 = $acs->item(0);
+        $this->assertTrue($acs1->hasAttribute("index"));
+        $this->assertEquals("0", $acs1->getAttribute("index"));
+
+        $metadata['attributes.index'] = 15;
+
+        $samlBuilder = new SAMLBuilder($entityId);
+        $samlBuilder->addMetadata($set, $metadata);
+
+        $spDesc = $samlBuilder->getEntityDescriptor();
+        $acs = $spDesc->getElementsByTagName("AttributeConsumingService");
+
+        /** @var \DOMElement $acs1 */
+        $acs1 = $acs->item(0);
+        $this->assertTrue($acs1->hasAttribute("index"));
+        $this->assertEquals("15", $acs1->getAttribute("index"));
+    }
+
+    /**
      * Test the index option is used correctly.
      */
-    public function testAttributeConsumingServiceIndex(): void
+    public function testLegacyAttributeConsumingServiceIndex(): void
     {
         $entityId = 'https://entity.example.com/id';
         $set = 'saml20-sp-remote';

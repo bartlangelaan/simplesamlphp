@@ -123,6 +123,11 @@ XML
         <RequestedAttribute FriendlyName="mail" Name="urn:mace:dir:attribute-def:mail" NameFormat="urn:mace:shibboleth:1.0:attributeNamespace:uri"/>
         <RequestedAttribute FriendlyName="displayName" Name="urn:mace:dir:attribute-def:displayName" NameFormat="urn:mace:shibboleth:1.0:attributeNamespace:uri"/>
       </AttributeConsumingService>
+      <AttributeConsumingService index="99">
+        <ServiceName xml:lang="en">Example service 99</ServiceName>
+        <ServiceDescription xml:lang="nl">Dit is een ander voorbeeld voor de unittest.</ServiceDescription>
+        <RequestedAttribute Name="urn:etoegang:DV:00000002003214394003:services:9001"/>
+      </AttributeConsumingService>
     </SPSSODescriptor>
 
   </EntityDescriptor>
@@ -136,18 +141,32 @@ XML
         /** @var array $metadata */
         $metadata = $entities['theEntityID']->getMetadata20SP();
 
-        $this->assertEquals("Example service", $metadata['name']['en']);
-        $this->assertEquals("Dit is een voorbeeld voor de unittest.", $metadata['description']['nl']);
-
-        $expected_a = [
-            "urn:mace:dir:attribute-def:eduPersonPrincipalName",
-            "urn:mace:dir:attribute-def:mail",
-            "urn:mace:dir:attribute-def:displayName"
+        $expected = [
+          [
+            'index' => 0,
+            'name' => ['en' => 'Example service'],
+            'description' => ['nl' => 'Dit is een voorbeeld voor de unittest.'],
+            'attributes' => [
+              "urn:mace:dir:attribute-def:eduPersonPrincipalName",
+              "urn:mace:dir:attribute-def:mail",
+              "urn:mace:dir:attribute-def:displayName"
+            ],
+            'attributes.required' => [
+              "urn:mace:dir:attribute-def:eduPersonPrincipalName"
+            ],
+            'attributes.NameFormat' => 'urn:mace:shibboleth:1.0:attributeNamespace:uri'
+          ],
+          [
+            'index' => 99,
+            'name' => ['en' => 'Example service 99'],
+            'description' => ['nl' => "Dit is een ander voorbeeld voor de unittest."],
+            'attributes' => [
+              "urn:etoegang:DV:00000002003214394003:services:9001"
+            ],
+          ]
         ];
-        $expected_r = ["urn:mace:dir:attribute-def:eduPersonPrincipalName"];
 
-        $this->assertEquals($expected_a, $metadata['attributes']);
-        $this->assertEquals($expected_r, $metadata['attributes.required']);
+        $this->assertEquals($expected, $metadata['AttributeConsumingService']);
     }
 
 

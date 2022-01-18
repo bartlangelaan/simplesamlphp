@@ -566,28 +566,8 @@ class SAMLParser
         }
 
         // add the list of attributes the SP should receive
-        if (array_key_exists('attributes', $spd)) {
-            $ret['attributes'] = $spd['attributes'];
-        }
-        if (array_key_exists('attributes.required', $spd)) {
-            $ret['attributes.required'] = $spd['attributes.required'];
-        }
-        if (array_key_exists('attributes.NameFormat', $spd)) {
-            $ret['attributes.NameFormat'] = $spd['attributes.NameFormat'];
-        }
-        if (array_key_exists('attributes.index', $spd)) {
-            $ret['attributes.index'] = $spd['attributes.index'];
-        }
-        if (array_key_exists('attributes.isDefault', $spd)) {
-            $ret['attributes.isDefault'] = $spd['attributes.isDefault'];
-        }
-
-        // add name & description
-        if (array_key_exists('name', $spd)) {
-            $ret['name'] = $spd['name'];
-        }
-        if (array_key_exists('description', $spd)) {
-            $ret['description'] = $spd['description'];
+        if (array_key_exists('AttributeConsumingService', $spd)) {
+            $ret['AttributeConsumingService'] = $spd['AttributeConsumingService'];
         }
 
         // add public keys
@@ -607,11 +587,6 @@ class SAMLParser
 
         // add extensions
         $this->addExtensions($ret, $spd);
-
-        // prioritize mdui:DisplayName as the name if available
-        if (!empty($ret['UIInfo']['DisplayName'])) {
-            $ret['name'] = $ret['UIInfo']['DisplayName'];
-        }
 
         return $ret;
     }
@@ -793,9 +768,8 @@ class SAMLParser
         $sp['AssertionConsumerService'] = self::extractEndpoints($element->getAssertionConsumerService());
 
         // find all the attributes and SP name...
-        $attcs = $element->getAttributeConsumingService();
-        if (count($attcs) > 0) {
-            self::parseAttributeConsumerService($attcs[0], $sp);
+        foreach ($element->getAttributeConsumingService() as $attcs) {
+            self::parseAttributeConsumerService($attcs, $sp);
         }
 
         // check AuthnRequestsSigned
@@ -1046,18 +1020,20 @@ class SAMLParser
      */
     private static function parseAttributeConsumerService(AttributeConsumingService $element, array &$sp): void
     {
-        $sp['name'] = $element->getServiceName();
-        $sp['description'] = $element->getServiceDescription();
+        $attributeConsumer = [];
+        $attributeConsumer['index'] = $element->getIndex();
+        $attributeConsumer['name'] = $element->getServiceName();
+        $attributeConsumer['description'] = $element->getServiceDescription();
 
         $format = null;
-        $sp['attributes'] = [];
-        $sp['attributes.required'] = [];
+        $attributeConsumer['attributes'] = [];
+        $attributeConsumer['attributes.required'] = [];
         foreach ($element->getRequestedAttribute() as $child) {
             $attrname = $child->getName();
-            $sp['attributes'][] = $attrname;
+            $attributeConsumer['attributes'][] = $attrname;
 
             if ($child->getIsRequired() === true) {
-                $sp['attributes.required'][] = $attrname;
+                $attributeConsumer['attributes.required'][] = $attrname;
             }
 
             if ($child->getNameFormat() !== null) {
@@ -1073,17 +1049,19 @@ class SAMLParser
             }
         }
 
-        if (empty($sp['attributes'])) {
+        if (empty($attributeConsumer['attributes'])) {
             // a really invalid configuration: all AttributeConsumingServices should have one or more attributes
-            unset($sp['attributes']);
+            unset($attributeConsumer['attributes']);
         }
-        if (empty($sp['attributes.required'])) {
-            unset($sp['attributes.required']);
+        if (empty($attributeConsumer['attributes.required'])) {
+            unset($attributeConsumer['attributes.required']);
         }
 
         if ($format !== Constants::NAMEFORMAT_UNSPECIFIED && $format !== null) {
-            $sp['attributes.NameFormat'] = $format;
+            $attributeConsumer['attributes.NameFormat'] = $format;
         }
+
+        $sp['AttributeConsumingService'][] = $attributeConsumer;
     }
 
 

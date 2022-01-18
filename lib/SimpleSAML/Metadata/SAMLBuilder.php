@@ -530,6 +530,11 @@ class SAMLBuilder
         }
         $e->setAssertionConsumerService(self::createEndpoints($endpoints, true));
 
+        $attributeConsumers = $metadata->getConfigItem('AttributeConsumingServices');
+        foreach ($attributeConsumers->getOptions() as $attributeConsumerI) {
+            $this->addAttributeConsumingService($e, $attributeConsumers->getConfigItem($attributeConsumerI));
+        }
+
         $this->addAttributeConsumingService($e, $metadata);
 
         $this->entityDescriptor->addRoleDescriptor($e);
